@@ -49,23 +49,23 @@ class senderFileFactory:
     def generateMulticastBlock(self, leg=0):
         if self.checkMulticast():
             sourceIP = self.interface.getActiveParameter("source_ip", leg)
-            sourcePort = self.interface.getActiveParameter("source_port", leg)
+            destinationPort = self.interface.getActiveParameter("destination_port", leg)
             destIP = self.interface.getActiveParameter("destination_ip", leg)
             return MULTICAST_SDP_TEMPLATE.format(
-                sourcePort,
+                destinationPort,
                 destIP,
                 destIP,
-                sourceIP                
+                sourceIP
             ) + RTP_POST_ADDR
         else:
             return ""
 
     def generateUnicastBlock(self, leg=0):
         if not self.checkMulticast():
-            sourcePort = self.interface.getActiveParameter("source_port", leg)
+            destinationPort = self.interface.getActiveParameter("destination_port", leg)
             destIP = self.interface.getActiveParameter("destination_ip", leg)
             return UNICAST_SDP_TEMPLATE.format(
-                sourcePort,
+                destinationPort,
                 destIP
             ) + RTP_POST_ADDR
         else:
