@@ -66,6 +66,7 @@ NMOS IS-04/05 reference implementation.",
         self.facade.delResource("device", self.deviceId)
 
     def makeReceiverData(self, receiverId):
+        interface = self.getInterface()
         receiverData = {
             "id": receiverId,
             "label": "example mock receiver",
@@ -81,7 +82,7 @@ NMOS IS-04/05 reference implementation.",
                 "active": False
             },
             "transport": "urn:x-nmos:transport:rtp",
-            "interface_bindings": ["eth0"],
+            "interface_bindings": [interface],
             "device_id": self.deviceId,
             "max_api_version": "v1.2"
         }
