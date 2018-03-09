@@ -16,9 +16,9 @@
 # used by the nmos driver to add and remove entities from the registry
 # It only supports single device operation
 
-from nmoscommon.facade import Facade
 from nmoscommon import ptptime
 import netifaces
+
 
 class SimpleFacadeWrapper:
 
@@ -31,37 +31,78 @@ class SimpleFacadeWrapper:
         self.sources = {}
         self.registerDevice(deviceId)
 
+    def makeDeviceData(self, deviceId):
+        self.deviceData = {
+            "id": self.deviceId,
+            "label": "example mock device",
+            "description": "A pretend device used as part of the\
+NMOS IS-04/05 reference implementation.",
+            "tags": {},
+            "type": "urn:x-nmos:device:generic",
+            "senders": [],
+            "receivers": [],
+            "controls": [],
+            "max_api_version": "v1.2"}
+        return self.deviceData
+
+    def updateDeviceVersion(self):
+        timeNow = ptptime.ptp_detail()
+        self.deviceData['version'] = "{}:{}".format(repr(timeNow[0]), repr(timeNow[1]))
+
     def registerDevice(self, deviceId):
         # Register device
         self.deviceId = deviceId
-        self.deviceData = {"id": self.deviceId, "label":"example mock device", "description": "A pretend device used as part of the NMOS IS-04/05 reference implementation.", "tags": {}, "type": "urn:x-nmos:device:generic", "senders":[], "receivers":[], "\
-controls": [], "max_api_version" : "v1.2" }
-        #self.facade.addResource("device",self.deviceId,self.deviceData)
-        self.updateDevice()
+        self.deviceData = self.makeDeviceData(deviceId)
+        self.updateDeviceVersion()
+        self.facade.addResource("device", self.deviceId, self.deviceData)
 
     def updateDevice(self):
         # Push our local copy of device data up, and increment version number
-        timeNow = ptptime.ptp_detail()
-        self.deviceData['version'] = "{}:{}".format(repr(timeNow[0]), repr(timeNow[1]))
-        self.facade.updateResource("device", self.deviceId,self.deviceData)
+        self.updateDeviceVersion()
+        self.facade.updateResource("device", self.deviceId, self.deviceData)
 
     def delDevice(self):
         # Remove device from registry
         self.facade.delResource("device", self.deviceId)
 
+    def makeReceiverData(self, receiverId):
+        receiverData = {
+            "id": receiverId,
+            "label": "example mock receiver",
+            "description": "A pretend receiver used as part of the \
+NMOS IS-04/05 reference implementation.",
+            "tags": {},
+            "format": "urn:x-nmos:format:video",
+            "caps": {
+                "media_types": ["video/raw"]
+            },
+            "subscription": {
+                "sender_id": None,
+                "active": False
+            },
+            "transport": "urn:x-nmos:transport:rtp",
+            "interface_bindings": ["eth0"],
+            "device_id": self.deviceId,
+            "max_api_version": "v1.2"
+        }
+        return receiverData
+
+    def updateReceiverVersion(self, receiverId):
+        timeNow = ptptime.ptp_detail()
+        self.receivers[receiverId]['version'] = "{}:{}".format(repr(timeNow[0]), repr(timeNow[1]))
+
     def registerReceiver(self, receiverId):
         # Register receiver
-        receiverData = {"id": receiverId, "label":"example mock receiver", "description": "A pretend receiver used as part of the NMOS IS-04/05 reference implementation.", "tags": {}, "format": "urn:x-nmos:format:video", "caps": { "media_types": ["video/raw"]}, "subscription": {"sender_id": None, "active": False}, "transport": "urn:x-nmos:transport:rtp", "interface_bindings": [ "eth0" ], "device_id": self.deviceId, "max_api_version": "v1.2"}
+        receiverData = self.makeReceiverData(receiverId)
         self.receivers[receiverId] = receiverData
-        #self.facade.addResource("receiver",receiverId,receiverData)
+        self.updateReceiverVersion(receiverId)
         self.deviceData['receivers'].append(receiverId)
-        self.updateReceiver(receiverId)
+        self.facade.addResource("receiver", receiverId, receiverData)
         self.updateDevice()
 
     def updateReceiver(self, receiverId):
         # Push our local copy of receiver data up, and increment version number
-        timeNow = ptptime.ptp_detail()
-        self.receivers[receiverId]['version'] = "{}:{}".format(repr(timeNow[0]), repr(timeNow[1]))
+        self.updateReceiverVersion(receiverId)
         self.facade.updateResource("receiver", receiverId, self.receivers[receiverId])
 
     def delReceiver(self, key):
@@ -71,18 +112,37 @@ controls": [], "max_api_version" : "v1.2" }
         self.receivers.pop(key)
         self.updateDevice()
 
+    def makeSourceData(self, sourceId):
+        sourceData = {
+            "id": sourceId,
+            "label": "example mock source",
+            "description": "A pretend source used as part of the NMOS \
+IS-04/05 reference implementation.",
+            "tags": {},
+            "format": "urn:x-nmos:format:video",
+            "caps": {},
+            "parents": [],
+            "device_id": self.deviceId,
+            "clock_name": "clk1",
+            "max_api_version": "v1.2"
+        }
+        return sourceData
+
     def registerSource(self, sourceId):
         # Register source
-        sourceData = {"id": sourceId, "label":"example mock source", "description": "A pretend source used as part of the NMOS IS-04/05 reference implementation.", "tags": {}, "format": "urn:x-nmos:format:video", "caps": {}, "parents": [], "device_id": self.deviceId, "clock_name": "clk1", "max_api_version": "v1.2"}
+        sourceData = self.makeSourceData(sourceId)
         self.sources[sourceId] = sourceData
-        #        self.facade.addResource("source",sourceId,sourceData)
-        self.updateSource(sourceId)
+        self.updateSourceVersion(sourceId)
+        self.facade.addResource("source", sourceId, sourceData)
         self.updateDevice()
+
+    def updateSourceVersion(self, sourceId):
+        timeNow = ptptime.ptp_detail()
+        self.sources[sourceId]['version'] = "{}:{}".format(repr(timeNow[0]), repr(timeNow[1]))
 
     def updateSource(self, sourceId):
         # Push our local copy of receiver data up, and increment version number
-        timeNow = ptptime.ptp_detail()
-        self.sources[sourceId]['version'] = "{}:{}".format(repr(timeNow[0]), repr(timeNow[1]))
+        self.updateSourceVersion(sourceId)
         self.facade.updateResource("source", sourceId, self.sources[sourceId])
 
     def delSource(self, key):
@@ -131,19 +191,22 @@ reference implementation.",
         }
         return flowData
 
+    def updateFlowVersion(self, flowId):
+        timeNow = ptptime.ptp_detail()
+        self.flows[flowId]['version'] = "{}:{}".format(repr(timeNow[0]), repr(timeNow[1]))
+
     def registerFlow(self, flowId, sourceId):
         # Register flow
         flowData = self.makeFlowData(flowId, sourceId)
         flowData['components'] = self.makeFlowComponents()
         self.flows[flowId] = flowData
-        #        self.facade.addResource("flow",flowId,flowData)
-        self.updateFlow(flowId)
+        self.updateFlowVersion(flowId)
+        self.facade.addResource("flow", flowId, flowData)
         self.updateDevice()
 
     def updateFlow(self, flowId):
         # Push our local copy of receiver data up, and increment version number
-        timeNow = ptptime.ptp_detail()
-        self.flows[flowId]['version'] = "{}:{}".format(repr(timeNow[0]), repr(timeNow[1]))
+        self.updateFlowVersion(flowId)
         self.facade.updateResource("flow", flowId, self.flows[flowId])
 
     def delFlow(self, key):
