@@ -17,7 +17,7 @@ from nmoscommon.webapi import WebAPI, route, basic_route
 from flask import request, abort, Response, redirect
 from jsonschema import validate, FormatChecker, ValidationError, SchemaError
 from abstractDevice import StagedLockedException
-from sdpParser import SdpManager
+from sdpManager import SdpManager
 import traceback
 import json
 from activator import Activator

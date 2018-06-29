@@ -16,7 +16,6 @@ import unittest
 import requests
 import os
 from ipppython.ipplogger import IppLogger
-from sdpParser import SdpManager
 import json
 from api import ConnectionManagementAPI
 from ipppython.httpserver import HttpServer

@@ -34,7 +34,7 @@ from flask import send_from_directory, send_file, request, abort
 from rtpSender import RtpSender
 from rtpReceiver import RtpReceiver
 from uuid import uuid4
-from sdpParser import SdpManager
+from sdpManager import SdpManager
 from sdpFactory import senderFileFactory
 from facadeWrapper import SimpleFacadeWrapper
 from api import SINGLE_ROOT, DEVICE_ROOT, QUERY_APIVERSION
