@@ -24,9 +24,8 @@ AttributeLine = namedtuple("AttributeLine", "ntype, atype, dest, source")
 
 def parseLine(line):
 
-    match = re.match("^(.)=(.*)", line)
-
-    type, value = match.group(1), match.group(2)
+    type = _get_line_type(line)
+    value = _get_line_value(line)
 
     if type == "c":
         return _parseConnectionLine(value)
@@ -35,7 +34,17 @@ def parseLine(line):
     elif type == "m":
         return _parseMediaLine(value)
     else:
-        return type, 'unknown', value
+        return None
+
+
+def _get_line_type(line):
+    match = re.match("^(.)=.*", line)
+    return match.group(1)
+
+
+def _get_line_value(line):
+    match = re.match("^.=(.*)", line)
+    return match.group(1)
 
 
 def _parseConnectionLine(value):
@@ -76,7 +85,7 @@ def _parseAttributeLine(value):
     if re.match("^.*source-filter: +incl +IN +IP4 +.*", value):
         return _parseIPv4AttributeLine(value)
     elif re.match("^.*source-filter: +incl +IN +IP6 +.*", value):
-        return _parseIPv4AttributeLine(value)
+        return _parseIPv6AttributeLine(value)
     else:
         return None
 
