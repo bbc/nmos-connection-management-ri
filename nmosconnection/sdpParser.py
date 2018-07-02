@@ -25,7 +25,8 @@ class SdpParser:
     def parseFile(self, sdp):
         lines = sdp.splitlines()
         for line in lines:
-            self._getLineData(line)
+            if line != "":
+                self._getLineData(line)
 
     def _getLineData(self, line):
         result = parseLine(line)
