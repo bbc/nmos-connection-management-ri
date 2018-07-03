@@ -65,22 +65,22 @@ class SdpManager():
                 type = updateObject['type']
             except KeyError as err:
                 # Something wrong with the request JSON
-                errMessage = "Missing field in \
-                PUT request to transport file:".format(str(err))
+                errMessage = ("Missing field in "
+                              "PUT request to transport file:".format(str(err)))
                 self.logger.writeError(errMessage)
                 raise KeyError(errMessage)
             if type != 'application/sdp':
                 # Asked to process a transport file other than SDP
-                errMessage = "This implementation of the CM API \
-                cannot handle transport files of type {}:".format(type)
+                errMessage = ("This implementation of the CM API "
+                              "cannot handle transport files of type {}:".format(type))
                 self.logger.writeError(errMessage)
                 raise ValueError(errMessage)
             self.stagedRequest = updateObject
             self.addSdpByAssignment(data)
             self.applyParamsToInterface()
         else:
-            errMessage = "Attempted to updated parameters \
-            while staged is locked"
+            errMessage = ("Attempted to updated parameters "
+                          "while staged is locked")
             self.logger.writeError(errMessage)
             raise StagedLockedException(errMessage)
 
