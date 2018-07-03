@@ -1,5 +1,6 @@
-python-connectionmanagement (0.1.0) UNRELEASED; urgency=low
+python-connectionmanagement (1.0.0ubuntu1) UNRELEASED; urgency=low
 
   * Initial Release
+  * Fixed buy with SDP parser
 
- -- Simon Rankine <simon.rankine@bbc.co.uk>  Wed, 18 Jan 2017 09:43:00 +0000
+ -- Simon Rankine <simon.rankine@bbc.co.uk>  Tue, 03 Jul 2018 09:27:24 +0100

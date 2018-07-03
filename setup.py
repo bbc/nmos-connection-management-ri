@@ -98,7 +98,7 @@ if sys.argv[1] != "sdist" and sys.argv[1] != "clean":
 
 
 setup(name = "nmosconnection",
-      version = "0.1.0",
+      version = "1.1.0",
       description = "Connection Management API implementation",
       url='https://github.com/bbc/nmos-connection-management-ri/',
       author='BBC R&D',
