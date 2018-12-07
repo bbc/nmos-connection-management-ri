@@ -31,7 +31,7 @@ def find_packages(path, base=""):
     packages = {}
     for item in os.listdir(path):
         dir = os.path.join(path, item)
-        if is_package( dir ):
+        if is_package(dir):
             if base:
                 module_name = "%(base)s.%(item)s" % vars()
             else:
@@ -54,22 +54,22 @@ packages_required = [
     "nmoscommon"
 ]
 
-setup(name = "connectionmanagement",
-      version = "1.0.1",
-      description = "Connection Management API implementation",
+setup(name="connectionmanagement",
+      version="1.0.1",
+      description="Connection Management API implementation",
       url='https://github.com/bbc/nmos-device-connection-management-ri/',
       author='BBC R&D',
       author_email='peter.brightwell@bbc.co.uk',
       license='Apache 2',
-      packages = package_names,
-      package_dir = packages,
-      install_requires = packages_required,
+      packages=package_names,
+      package_dir=packages,
+      install_requires=packages_required,
       package_data={'': ['templates/*']},
-      scripts = [],
+      scripts=[],
       data_files=[
         ('/usr/bin', ['bin/connectionmanagement'])
                  ],
-      long_description = """
+      long_description="""
 Implementation of NMOS connection management API
 """
       )
