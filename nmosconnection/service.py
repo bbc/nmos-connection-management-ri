@@ -21,7 +21,6 @@ Manages a graceful shutdown on SIGINT, SIGTERM
 
 import signal
 import gevent
-import sys
 
 from nmoscommon.httpserver import HttpServer
 from api import ConnectionManagementAPI, QUERY_APINAME, QUERY_APIVERSION, DEVICE_ROOT
@@ -37,7 +36,8 @@ class ConnectionManagementService:
         from nmoscommon.facade import Facade
         self.logger = Logger("conmanage")
         self.logger.writeWarning("Could not find ipppython facade")
-        self.facade = Facade("{}/{}".format(QUERY_APINAME, QUERY_APIVERSION), address="ipc:///tmp/ips-nodefacade", logger=self.logger)
+        self.facade = Facade("{}/{}".format(QUERY_APINAME, QUERY_APIVERSION),
+                             address="ipc:///tmp/ips-nodefacade", logger=self.logger)
         self.logger.writeDebug("Running Connection Management Service")
         self.httpServer = HttpServer(ConnectionManagementAPI, WS_PORT,
                                      '0.0.0.0', api_args=[self.logger])
@@ -92,7 +92,7 @@ class ConnectionManagementService:
                 self.facade.heartbeat_service()
                 itercount = 0
         self._cleanup()
-        
+
     def _cleanup(self):
         self.httpServer.stop()
         self.facade.unregister_service()
