@@ -95,6 +95,7 @@ class ConnectionManagementService:
         
     def _cleanup(self):
         self.httpServer.stop()
+        self.facade.unregister_service()
 
     def sig_handler(self):
         self.stop()
