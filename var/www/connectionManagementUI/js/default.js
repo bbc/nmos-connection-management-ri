@@ -130,12 +130,15 @@ function stageTransportFile(uuid){
 }
 
 function setupActivates(type, uuid){
+    $('#' + type + '-activate-now').off('click')
     $('#' + type + '-activate-now').click(function(){
         activate(type, "now", uuid);
     });
+    $('#' + type + '-activate-relative').off('click')
     $('#' + type + '-activate-relative').click(function(){
         activate(type, "relative", uuid);
     });
+    $('#' + type + '-activate-absolute').off('click')
     $('#' + type + '-activate-absolute').click(function(){
         activate(type, "absolute", uuid);
     });
