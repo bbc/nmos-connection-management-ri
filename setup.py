@@ -56,7 +56,7 @@ packages_required = [
 ]
 
 setup(name="connectionmanagement",
-      version="2.0.2",
+      version="2.0.3",
       description="Connection Management API implementation",
       url='https://github.com/bbc/nmos-device-connection-management-ri/',
       author='BBC R&D',
@@ -68,8 +68,8 @@ setup(name="connectionmanagement",
       package_data={'': ['templates/*']},
       scripts=[],
       data_files=[
-        ('/usr/bin', ['bin/connectionmanagement'])
-                 ],
+          ('/usr/bin', ['bin/connectionmanagement'])
+      ],
       long_description="""
 Implementation of NMOS connection management API
 """

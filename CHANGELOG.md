@@ -1,5 +1,8 @@
 # NMOS Connection Management API Implementation Changelog
 
+## 2.0.3
+- Addition of NMOS Oauth2 Security Decorators to protect connection endpoints
+
 ## 2.0.2
 - Add Python 3 support
 
