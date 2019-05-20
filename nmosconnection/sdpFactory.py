@@ -136,7 +136,7 @@ class senderFileFactory:
 
     def checkRedundant(self):
         return self.interface.legs > 1 and self.interface.getActiveParameter("rtp_enabled", 1)
-    
+
     def check2022_5(self):
         # Check to see if SMPTE2022-5 is in use. This is the only
         # FEC scheme we'll include in SDP files or it gets complicated
@@ -148,8 +148,8 @@ class senderFileFactory:
         seperateStreams = destPort1D != destPort2D
         # Start to build up FEC block(s)
         if legs == 1 and seperateStreams and codeType == "XOR":
-                # Looks like 2022-5 - special case which we know how to make SDPs for
-                return self.interface.getActiveParameter("fec_enabled")
+            # Looks like 2022-5 - special case which we know how to make SDPs for
+            return self.interface.getActiveParameter("fec_enabled")
         return False
         # This script could be further extended to handle fec schemes that
         # aren't SMPTE2022-5. However there is little guidance as to the correct

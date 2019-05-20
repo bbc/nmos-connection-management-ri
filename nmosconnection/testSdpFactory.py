@@ -29,12 +29,13 @@ class TestSdpFactory(unittest.TestCase):
         self.UUT.checkMulticast = MagicMock()
         self.UUT.checkMulticast.return_value = True
 
-        def sideEffect(name, leg): return name
+        def sideEffect(name, leg):
+            return name
         self.UUT.interface.getActiveParameter.side_effect = sideEffect
         actual = self.UUT.generateMulticastBlock()
         expected = (
-             '\nm=video destination_port RTP/AVP 103\nc=IN IP4 destination_ip/32\n'
-             'a=source-filter: incl IN IP4 destination_ip source_ip' + RTP_POST_ADDR
+            '\nm=video destination_port RTP/AVP 103\nc=IN IP4 destination_ip/32\n'
+            'a=source-filter: incl IN IP4 destination_ip source_ip' + RTP_POST_ADDR
         )
         self.assertEqual(expected, actual)
 
@@ -53,7 +54,8 @@ class TestSdpFactory(unittest.TestCase):
         self.UUT.checkMulticast = MagicMock()
         self.UUT.checkMulticast.return_value = False
 
-        def sideEffect(name, leg): return name
+        def sideEffect(name, leg):
+            return name
         self.UUT.interface.getActiveParameter.side_effect = sideEffect
         actual = self.UUT.generateUnicastBlock()
         expected = (
@@ -69,6 +71,7 @@ class TestSdpFactory(unittest.TestCase):
         expected = ""
         actual = self.UUT.generateUnicastBlock()
         self.assertEqual(expected, actual)
+
 
 RTP_POST_ADDR = """
 a=ts-refclk:ptp=IEEE1588-2008:08-00-11-ff-fe-21-e1-b0

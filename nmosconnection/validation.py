@@ -64,7 +64,7 @@ def isValidIpv6(address):
 def isValidPort(port):
     try:
         val = int(port)
-    except:
+    except Exception:
         raise TypeError('Port number must be an integer')
     if val < 5000 or val > 49151:
         raise TypeError('Port number must be in range 5000-49151 inclusive')
@@ -107,7 +107,7 @@ def isInt(value):
 
 
 def isUUID(value):
-    expression = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    expression = r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
     if re.match(expression, value):
         return True
     else:
@@ -115,7 +115,7 @@ def isUUID(value):
 
 
 def isTypeString(value):
-    expression = "^[^\s\/]+\/[^\s\/]+$"
+    expression = r"^[^\s\/]+\/[^\s\/]+$"
     if re.match(expression, value):
         return True
     else:

@@ -40,6 +40,7 @@ class MockApi():
     def unLock(self):
         self.locked = False
 
+
 class MockTimer():
     """A mock timer"""
     def __init__(self):
@@ -47,6 +48,7 @@ class MockTimer():
 
     def cancel(self):
         self.cancelled = True
+
 
 class TestActivatorModule(unittest.TestCase):
     """Test the Activator Module"""
@@ -93,7 +95,7 @@ class TestActivatorModule(unittest.TestCase):
         """Test the starting state"""
         self.check_last_is_null()
         actual = self.dut.activeRequest
-        expected ={
+        expected = {
             "mode": None,
             "requested_time": None,
             "activation_time": None
@@ -267,7 +269,7 @@ class TestActivatorModule(unittest.TestCase):
         self.assertEqual(202, ret[0])
         self.assertEqual(mode, "activate_scheduled_relative")
         self.assertAlmostEqual(float(sched.to_sec_frac()),
-                               float(ippTime.to_sec_frac()),2)
+                               float(ippTime.to_sec_frac()), 2)
         self.assertEqual(code, 202)
         self.assertEqual(ret[1], self.dut.getLastRequest())
 
@@ -326,6 +328,6 @@ class TestActivatorModule(unittest.TestCase):
         self.dut.lastRequest['mode'] = "testMode"
         self.dut.lastRequest['activation_time'] = "5:0"
         self.dut.moveToActive()
-        self.assertEqual(self.dut.activeRequest['mode'],"testMode")
-        self.assertEqual(self.dut.activeRequest['activation_time'],"5:0")
+        self.assertEqual(self.dut.activeRequest['mode'], "testMode")
+        self.assertEqual(self.dut.activeRequest['activation_time'], "5:0")
         self.check_last_is_null()

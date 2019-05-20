@@ -21,16 +21,10 @@
 
 from __future__ import absolute_import
 
-import os
 import netifaces
-import json
 import random
-import uuid
-import gevent
-from gevent import Greenlet
-from nmoscommon import ptptime
 from nmoscommon.httpserver import HttpServer
-from nmoscommon.webapi import WebAPI, file_route, route, basic_route
+from nmoscommon.webapi import WebAPI, route, basic_route
 from nmoscommon.utils import getLocalIP
 from flask import send_from_directory, send_file, request, abort
 from .rtpSender import RtpSender
@@ -78,7 +72,7 @@ class NmosDriverWebApi(WebAPI):
         self.logger = logger
         self.manager = manager
         self.facade = facade
-        self.path = path = "/var/www/connectionManagementDriver"
+        self.path = "/var/www/connectionManagementDriver"
         self.senders = {}
         self.receivers = {}
         self.sources = {}  # Sources indexed by sender using them
@@ -187,7 +181,7 @@ class NmosDriverWebApi(WebAPI):
         sender.supportRtcp(rtcp)
         sender.supportFec(fec)
         # Add some network interfaces
-        for leg in range(0,legs):
+        for leg in range(0, legs):
             sender.addInterface(self.generateRandomUnicast(), leg)
         # Provide the API with a method for choosing a multicast addr autoatically
         sender.setDestinationSelector(self.destinationSelector)
@@ -226,7 +220,7 @@ class NmosDriverWebApi(WebAPI):
         receiver.supportRtcp(rtcp)
         receiver.supportFec(fec)
         # Add network interfaces for each leg
-        for leg in range(0,legs):
+        for leg in range(0, legs):
             receiver.addInterface(self.generateRandomUnicast(), leg)
         receiver.activateStaged()
         receiverId = str(uuid4())
@@ -268,9 +262,9 @@ class NmosDriverWebApi(WebAPI):
         """Generates a random unicast address. Please never ever use
         this in a production system... only for demo purposes"""
         toReturn = "192"
-        for i in range(0,3):
+        for i in range(0, 3):
             toReturn = toReturn + "."
-            number = random.uniform(1,254)
+            number = random.uniform(1, 254)
             toReturn = toReturn + str(int(number))
         return toReturn
 
@@ -279,15 +273,16 @@ class NmosDriverWebApi(WebAPI):
         production system either. It would substantially increase the
         change of multicast address colission"""
         toReturn = "225"
-        for i in range(0,3):
+        for i in range(0, 3):
             toReturn = toReturn + "."
-            number = random.uniform(1,254)
+            number = random.uniform(1, 254)
             toReturn = toReturn + str(int(number))
         return toReturn
 
+
 class activationController:
 
-    def __init__(self, portId, port, facadeWrapper, fileFactory = None):
+    def __init__(self, portId, port, facadeWrapper, fileFactory=None):
         self.portId = portId
         self.port = port
         self.facadeWrapper = facadeWrapper

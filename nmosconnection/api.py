@@ -15,15 +15,16 @@
 from __future__ import absolute_import
 
 import os
-from nmoscommon.webapi import WebAPI, route, basic_route
 from flask import request, abort, Response
 from jsonschema import validate, FormatChecker, ValidationError
-from .abstractDevice import StagedLockedException
 import traceback
 import json
+from nmoscommon.auth.nmos_auth import RequiresAuth
+from nmoscommon.webapi import WebAPI, route, basic_route
+
 from .activator import Activator
 from .constants import SCHEMA_LOCAL
-from nmoscommon.auth.nmos_auth import RequiresAuth
+from .abstractDevice import StagedLockedException
 
 __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -32,11 +33,9 @@ CONN_APINAMESPACE = "x-nmos"
 CONN_APINAME = "connection"
 CONN_APIVERSIONS = ["v1.0", "v1.1"]
 
-
 DEVICE_ROOT = '/' + CONN_APINAMESPACE + '/' + CONN_APINAME + '/'
 SINGLE_ROOT = "single/"
 BULK_ROOT = "bulk/"
-
 
 TRANSPORT_URN = "urn:x-nmos:transport:"
 VALID_TRANSPORTS = {
@@ -181,7 +180,7 @@ class ConnectionManagementAPI(WebAPI):
             abort(404)
         try:
             self.getDevice(api_version, sr, device)
-        except:
+        except Exception:
             abort(404)
         obj = ['constraints/', 'staged/', 'active/']
         if sr == 'senders':
@@ -196,7 +195,7 @@ class ConnectionManagementAPI(WebAPI):
             abort(404)
         try:
             device = self.getDevice(api_version, sr, device)
-        except:
+        except Exception:
             abort(404)
         return device.getConstraints()
 
@@ -207,7 +206,7 @@ class ConnectionManagementAPI(WebAPI):
             abort(404)
         try:
             deviceObj = self.getDevice(api_version, sr, device)
-        except:
+        except Exception:
             abort(404)
         toReturn = deviceObj.stagedToJson()
         toReturn['activation'] = self.getActivator(device).getLastRequest()
@@ -230,7 +229,7 @@ class ConnectionManagementAPI(WebAPI):
         toReturn = {}
         try:
             deviceObj = self.getDevice(api_version, sr, device)
-        except:
+        except Exception:
             return (404, {})
         try:
             self.validateAgainstSchema(obj, 'v1.0-{}-stage-schema.json'.format(sr[:-1]))
@@ -292,7 +291,7 @@ class ConnectionManagementAPI(WebAPI):
         if sr == "receivers":
             try:
                 transportManager = self.getTransportManager(deviceId)
-            except:
+            except Exception:
                 return (500, self.errorResponse(500, "Could not find transport manager"))
             toReturn['transport_file'] = transportManager.getStagedRequest()
         return (activationRet[0], toReturn)
@@ -336,7 +335,7 @@ class ConnectionManagementAPI(WebAPI):
         except ValidationError as err:
             return (400, self.errorResponse(400, str(err)))
         except StagedLockedException as e:
-            return (423, self.errorResponse(423, "Resource is locked due to a pending activation"))
+            return (423, self.errorResponse(423, "{}. Resource is locked due to a pending activation".format(e)))
         return (200, {})
 
     def applyActivation(self, request, uuid):
@@ -355,7 +354,7 @@ class ConnectionManagementAPI(WebAPI):
             abort(404)
         try:
             deviceObj = self.getDevice(api_version, sr, device)
-        except:
+        except Exception:
             abort(404)
         toReturn = {}
         toReturn = deviceObj.activeToJson()
@@ -371,7 +370,7 @@ class ConnectionManagementAPI(WebAPI):
             abort(404)
         try:
             device = self.getDevice(api_version, 'senders', device)
-        except:
+        except Exception:
             abort(404)
         resp = Response(device.transportFile)
         resp.headers['content-type'] = 'application/sdp'
@@ -387,7 +386,7 @@ class ConnectionManagementAPI(WebAPI):
 
         try:
             deviceObj = self.getDevice(api_version, sr, device)
-        except:
+        except Exception:
             abort(404)
         toReturn = {}
         toReturn = json.dumps(TRANSPORT_URN + deviceObj.getTransportType())
@@ -415,13 +414,13 @@ class ConnectionManagementAPI(WebAPI):
             for entry in obj:
                 try:
                     id = entry['id']
-                except KeyError as err:
-                    message = "Failed to find field 'id' in one or more objects"
+                except KeyError as e:
+                    message = "{}. Failed to find field 'id' in one or more objects".format(e)
                     return (400, self.errorResponse(400, message))
                 try:
                     params = entry['params']
-                except KeyError as err:
-                    message = "Failed to find field 'params' in one or more objects"
+                except KeyError as e:
+                    message = "{}. Failed to find field 'params' in one or more objects".format(e)
                     return (400, self.errorResponse(400, message))
                 res = self.staged_patch(api_version, sr, id, params)
                 statuses.append({"id": id, "code": res[0]})
@@ -439,7 +438,7 @@ class ConnectionManagementAPI(WebAPI):
         try:
             receiver = self.receivers[device]
             manager = receiver.transportManagers[0]
-        except:
+        except Exception:
             abort(404)
         resp = Response(manager.getActiveSdp())
         resp.headers['content-type'] = 'application/sdp'

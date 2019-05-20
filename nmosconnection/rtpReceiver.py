@@ -17,7 +17,6 @@ from __future__ import absolute_import
 import os
 import json
 import copy
-import socket
 
 from .abstractDevice import AbstractDevice
 from .constants import SCHEMA_LOCAL
@@ -214,8 +213,8 @@ class RtpReceiver(AbstractDevice):
                     params.pop(key)
         # Merge in extra requirements required by constraints
         for key, entry in params.items():
-           if key in self.constraints[leg]:
-               entry.update(self.constraints[leg][key])
+            if key in self.constraints[leg]:
+                entry.update(self.constraints[leg][key])
         obj['items']['properties'] = params
         return obj
 

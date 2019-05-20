@@ -53,9 +53,8 @@ class AbstractDevice:
             try:
                 self.logger.writeDebug("Activation suceeded")
                 self.callback()
-            except:
-                """Something went wrong, revert to old params"""
-                self.logger.writeWarning("Activation failed")
+            except Exception as e:
+                self.logger.writeWarning("Activation failed, reverting to old params. {}".format(e))
                 self.active = copy.deepcopy(oldParams)
                 raise
 
@@ -121,7 +120,7 @@ class AbstractDevice:
 
     def setActiveParameter(self, value, parameter, leg=0):
         """Set the value of an active parameter"""
-        if parmaeter in self.active[__tp__][leg]:
+        if parameter in self.active[__tp__][leg]:
             self.staged[__tp__][leg][parameter]
         else:
             raise ValueError
@@ -149,7 +148,7 @@ class AbstractDevice:
             # Looks like we can't use pton here...
             try:
                 socket.inet_aton(addr)
-            except scoket.error:
+            except socket.error:
                 return False
         except socket.error:
             return False
@@ -179,6 +178,7 @@ class AbstractDevice:
     @abstractmethod
     def getTransportType(self):
         pass
+
 
 class StagedLockedException(Exception):
     pass

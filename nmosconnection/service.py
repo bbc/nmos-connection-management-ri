@@ -25,12 +25,12 @@ import gevent
 from gevent import monkey
 monkey.patch_all()
 
-import signal
+import signal  # noqa E402
 
-from nmoscommon.httpserver import HttpServer
-from .api import ConnectionManagementAPI, CONN_APINAME, CONN_APIVERSIONS, DEVICE_ROOT
-from .nmosDriver import NmosDriver
-from .constants import WS_PORT
+from nmoscommon.httpserver import HttpServer  # noqa E402
+from .api import ConnectionManagementAPI, CONN_APINAME, CONN_APIVERSIONS, DEVICE_ROOT  # noqa E402
+from .nmosDriver import NmosDriver  # noqa E402
+from .constants import WS_PORT  # noqa E402
 
 
 class ConnectionManagementService:

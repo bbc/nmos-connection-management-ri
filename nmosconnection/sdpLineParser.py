@@ -53,16 +53,16 @@ def _parseConnectionLine(value):
     # Look for connection information - sadly sdp connection field
     # doesn't accomodate SSMC so we have to find the destination IP
     # from an source filter attribute instead
-    if re.match("^ *IN +IP4 +.*$", value):
+    if re.match(r"^ *IN +IP4 +.*$", value):
         return _parseIPv4ConnectionLine(value)
-    elif re.match("^ *IN +IP6 +.*$", value):
+    elif re.match(r"^ *IN +IP6 +.*$", value):
         return _parseIPv6ConnectionLine(value)
     else:
         raise SdpParseError("Could not parse SDP line: {}".format(value))
 
 
 def _parseIPv6ConnectionLine(value):
-    match = re.match("^ *IN +IP6 +([^/]+) *$", value)
+    match = re.match(r"^ *IN +IP6 +([^/]+) *$", value)
     ntype, atype = "IN", "IP6"
     addr = match.groups()[0]
     groupsize = 1
@@ -71,7 +71,7 @@ def _parseIPv6ConnectionLine(value):
 
 
 def _parseIPv4ConnectionLine(value):
-    match = re.match("^ *IN +IP4 +([^/]+)(?:/(\d+)(?:/(\d+))?)? *$", value)
+    match = re.match(r"^ *IN +IP4 +([^/]+)(?:/(\d+)(?:/(\d+))?)? *$", value)
     ntype, atype = "IN", "IP4"
     addr, ttl, groupsize = match.groups()
     if ttl is None:
@@ -84,9 +84,9 @@ def _parseIPv4ConnectionLine(value):
 def _parseAttributeLine(value):
     # Looks for media attributes - I'm only interested in finding
     # source filters (RFC4570) to work out the SSMC destination address
-    if re.match("^.*source-filter: +incl +IN +IP4 +.*", value):
+    if re.match(r"^.*source-filter: +incl +IN +IP4 +.*", value):
         return _parseIPv4AttributeLine(value)
-    elif re.match("^.*source-filter: +incl +IN +IP6 +.*", value):
+    elif re.match(r"^.*source-filter: +incl +IN +IP6 +.*", value):
         return _parseIPv6AttributeLine(value)
     else:
         return None
@@ -95,7 +95,7 @@ def _parseAttributeLine(value):
 def _parseIPv4AttributeLine(value):
     # IPV4 Source filter
     ntype, atype = "IN", "IP4"
-    match = re.match("^.*IN +IP4+ (?:((?:\d+\.?)+)) (?:((?:\d+\.?)+))", value)
+    match = re.match(r"^.*IN +IP4+ (?:((?:\d+\.?)+)) (?:((?:\d+\.?)+))", value)
     dest, source = match.groups(match)
     return AttributeLine(ntype, atype, dest, source)
 
@@ -103,9 +103,9 @@ def _parseIPv4AttributeLine(value):
 def _parseIPv6AttributeLine(value):
     # IPV6 Source filter
     ntype, atype = "IN", "IP6"
-    regexp = ("^.*source-filter: +incl +IN +IP6 +"
-              "((?:[\dabcdefABCDEF]{1,4}:*)+) +((?:[\dabcdefABCDEF]"
-              "{1,4}:*)+)")
+    regexp = (r"^.*source-filter: +incl +IN +IP6 +"
+              r"((?:[\dabcdefABCDEF]{1,4}:*)+) +((?:[\dabcdefABCDEF]"
+              r"{1,4}:*)+)")
     match = re.match(regexp, value)
     dest, source = match.groups(match)
     return AttributeLine(ntype, atype, dest, source)
@@ -113,8 +113,8 @@ def _parseIPv6AttributeLine(value):
 
 def _parseMediaLine(value):
     # We need to look at the media tag to get the port number to use...
-    regexp = ("^(audio|video|text|application|message) +"
-              "(\d+)(?:[/](\d+))? +([^ ]+) +(.+)$")
+    regexp = (r"^(audio|video|text|application|message) +"
+              r"(\d+)(?:[/](\d+))? +([^ ]+) +(.+)$")
     media, port, numports, protocol, fmt = re.match(regexp, value).groups()
     port = int(port)
     if numports is None:

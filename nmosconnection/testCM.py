@@ -16,12 +16,11 @@ import unittest
 import json
 import os
 import copy
-import sys
-sys.path.append('../')
-from nmosconnection.rtpSender import RtpSender
-from jsonschema import validate, ValidationError
-from nmosconnection.abstractDevice import StagedLockedException
+from jsonschema import ValidationError
 from nmoscommon.logger import Logger
+
+from .abstractDevice import StagedLockedException
+from .rtpSender import RtpSender
 
 API_WS_PORT = 8856
 SENDER_WS_PORT = 8857
@@ -102,18 +101,18 @@ class TestRtpSenderBackend(unittest.TestCase):
 
     def test_schema_filtering(self):
         """Checks that the correct JSON schema is returned"""
-        for x in range(0,1):
-            for y in range(0,1):
+        for x in range(0, 1):
+            for y in range(0, 1):
                 fec = (x == 0)
                 rtcp = (y == 0)
             self.dut._enableFec = fec
             self.dut._enableRtcp = rtcp
             schema = self.dut.getParamsSchema()['items']['properties']
-            for key,value in schema.items():
+            for key, value in schema.items():
                 if not fec:
-                    self.assertNotEqual(key[0:2],"fec")
+                    self.assertNotEqual(key[0:2], "fec")
                 if not rtcp:
-                    self.assertNotEqual(key[0:3],"rtcp")
+                    self.assertNotEqual(key[0:3], "rtcp")
 
     def test_schema_merging(self):
         """Checks that constraints get merged into the schema properly"""
@@ -124,7 +123,7 @@ class TestRtpSenderBackend(unittest.TestCase):
             "10.0.0.2"
         ]
         self.dut.constraints = [{
-            "source_ip":{
+            "source_ip": {
                 "enum": []
             },
             "source_port":{
@@ -223,7 +222,7 @@ class TestRtpSenderBackend(unittest.TestCase):
         self.dut.staged[__tp__][1]['rtp_enabled'] = False
         try:
             self.dut.activateStaged()
-        except:
+        except Exception:
             # We would expect this to throw
             pass
         self.assertEqual(self.dut.active, preActivationParams)
@@ -255,7 +254,7 @@ class TestRtpSenderBackend(unittest.TestCase):
         actual = constraints[0]['source_ip']['enum']
         self.assertEqual(expected, actual)
 
-    def test_resolve_source_ip(self):
+    def test_resolve_default_source_ip(self):
         self.dut.constraints['source_ip']['enum'].append("192.168.0.50")
         expected = "192.168.0.50"
         actual = self.dut.defaultSourceSelector({})
@@ -275,12 +274,12 @@ class TestRtpSenderBackend(unittest.TestCase):
         """Test resolving the source IP"""
         expected = "192.168.1.40"
         self.dut.addInterface(expected)
-        actual = self.dut.sourceSelector({},0)
+        actual = self.dut.sourceSelector({}, 0)
         self.assertEqual(actual, expected)
         self.dut.setSourceSelector(self._mockCallback)
         expected = "10.0.1.2"
         self.callbackReturn = expected
-        actual = self.dut.sourceSelector({},0)
+        actual = self.dut.sourceSelector({}, 0)
 
     def test_resolve_rtcp_dest_port(self):
         """Test automatic resolution of rtcp dest port"""
@@ -298,7 +297,7 @@ class TestRtpSenderBackend(unittest.TestCase):
 
     def test_resolve_rtcp_dest_ip(self):
         """Test automatic resolution of rtcp dest ip"""
-        data = [{ 'destination_ip': "192.168.0.1"}]
+        data = [{'destination_ip': "192.168.0.1"}]
         expected = "192.168.0.1"
         actual = self.dut._resolveRtcpDestIp(data, 0)
         self.assertEqual(actual, expected)
@@ -333,9 +332,9 @@ class TestRtpSenderBackend(unittest.TestCase):
 
     def test_resolve_fecIp(self):
         """Test automatic resolution of fec ip address"""
-        data = [{ 'destination_ip': "192.168.0.1"}]
+        data = [{'destination_ip': "192.168.0.1"}]
         expected = "192.168.0.1"
-        actual = self.dut._resolveFecIp(data,0)
+        actual = self.dut._resolveFecIp(data, 0)
         self.assertEqual(actual, expected)
 
     def test_resolve_destination_port(self):
@@ -347,5 +346,5 @@ class TestRtpSenderBackend(unittest.TestCase):
     def test_resolve_source_port(self):
         """Test automatic resolution of source port"""
         expected = 5004
-        actual = self.dut._resolveSourcePort({},0)
+        actual = self.dut._resolveSourcePort({}, 0)
         self.assertEqual(expected, actual)

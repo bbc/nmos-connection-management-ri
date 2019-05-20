@@ -221,7 +221,7 @@ reference implementation.",
         interfaces = netifaces.interfaces()
         try:
             return interfaces[1]
-        except IndexException:
+        except IndexError:
             return interfaces[0]
 
     def makeSenderData(self, senderId, flowId):

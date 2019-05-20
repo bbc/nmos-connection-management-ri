@@ -42,7 +42,6 @@ class RtpSender(AbstractDevice):
         self.sourceSelector = self.defaultSourceSelector
         self.destinationSelector = self.defaultDestinationSelector
 
-
         self.legs = legs
         self.staged[__tp__] = list(range(legs))
         self.staged[__tp__][0] = {}
@@ -50,12 +49,17 @@ class RtpSender(AbstractDevice):
             self.staged[__tp__][1] = {}
 
         # Set collections of parameters
-        self.generalParams = ['source_ip', 'destination_ip', 'destination_port', 'source_port', 'rtp_enabled']
-        self.fecParams = ['fec_enabled', 'fec_destination_ip', 'fec_mode', 'fec_type',
-                          'fec_block_width', 'fec_block_height', 'fec1D_destination_port',
-                          'fec1D_source_port', 'fec2D_destination_port', 'fec2D_source_port']
-        self.rtcpParams = ['rtcp_enabled', 'rtcp_destination_ip', 'rtcp_destination_port',
-                          'rtcp_source_port']
+        self.generalParams = [
+            'source_ip', 'destination_ip', 'destination_port', 'source_port', 'rtp_enabled'
+        ]
+        self.fecParams = [
+            'fec_enabled', 'fec_destination_ip', 'fec_mode', 'fec_type',
+            'fec_block_width', 'fec_block_height', 'fec1D_destination_port',
+            'fec1D_source_port', 'fec2D_destination_port', 'fec2D_source_port'
+        ]
+        self.rtcpParams = [
+            'rtcp_enabled', 'rtcp_destination_ip', 'rtcp_destination_port', 'rtcp_source_port'
+        ]
 
         # Set up default values as per spec.
         for leg in range(0, legs):

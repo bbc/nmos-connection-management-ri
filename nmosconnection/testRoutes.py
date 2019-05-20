@@ -47,10 +47,11 @@ CONN_APINAME = "connection"
 CONN_APIVERSION = "v1.0"
 
 
-DEVICE_ROOT = CONN_APINAMESPACE+'/'+CONN_APINAME+'/'+CONN_APIVERSION+'/'
+DEVICE_ROOT = CONN_APINAMESPACE + '/' + CONN_APINAME + '/' + CONN_APIVERSION + '/'
 
 __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
 
 class MockActivator():
 
@@ -126,14 +127,14 @@ class MockSenderAPI():
             "transport_params": {
                 "param": True
             },
-            "master_enable" : True,
+            "master_enable": True,
             "receiver_id": "baf75b16-5a5c-11e7-907b-a6006ad3dba0"
         }
         self.active = {
             "transport_params": {
                 "param": False
             },
-            "master_enable" : True,
+            "master_enable": True,
             "receiver_id": "baf75b16-5a5c-11e7-907b-a6006ad3dba0"
         }
         self.updated = False
@@ -322,7 +323,7 @@ class TestRoutes(unittest.TestCase):
         actual = json.loads(r.text)
         self.assertEqual(expected, actual)
 
-    def test_sender_staged_params_json_get(self):
+    def test_receiver_staged_params_json_get(self):
         """Checks that the JSON get route exists for /staged/
         for receivers"""
         self.dut.activators[self.receiverUUID] = self.activator
@@ -391,9 +392,9 @@ class TestRoutes(unittest.TestCase):
         """Tests the assmebly of staging respones"""
         self.dut.transportManagers[self.receiverUUID] = self.sdpManager
         activationResponse = (200, {"activation", "yes"})
-        ret = self.dut.assembleResponse("recievers", self.mockReceiver, self.receiverUUID, activationResponse)
+        self.dut.assembleResponse("recievers", self.mockReceiver, self.receiverUUID, activationResponse)
 
-    def test_staged_params_json_patch(self):
+    def test_staged_exists_json_patch(self):
         """Checks that the route exists for putting to
         /staged/"""
         data = {}
@@ -491,7 +492,7 @@ class TestRoutes(unittest.TestCase):
         r = requests.get(self.senderRoot + "/active/",
                          headers=HEADERS)
         expected = {}
-        expected  = self.dut.senders[self.senderUUID].activeToJson()
+        expected = self.dut.senders[self.senderUUID].activeToJson()
         expected['activation'] = {"request": "active"}
         actual = json.loads(r.text)
         self.assertEqual(expected, actual)
@@ -540,7 +541,8 @@ class TestRoutes(unittest.TestCase):
             {
                 "id": "cdfe5910-5c02-11e7-907b-a6006ad3dba0",
                 "params": {"test": 2}
-            },{
+            },
+            {
                 "id": "cdfe5a1e-5c02-11e7-907b-a6006ad3dba0",
                 "params": {"test": 3}
             }
@@ -582,7 +584,7 @@ class TestRoutes(unittest.TestCase):
         self.dut.useValidation = True
         data = [
             {
-                "transport_params":{
+                "transport_params": {
                     "rtp_enabled": "yellow"
                 }
             }

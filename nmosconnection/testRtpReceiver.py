@@ -19,7 +19,6 @@ import copy
 from nmoscommon.logger import Logger
 from nmosconnection.rtpReceiver import RtpReceiver
 from nmosconnection.fieldException import FieldException
-from jsonschema import ValidationError
 
 SENDER_WS_PORT = 8857
 HEADERS = {'Content-Type': 'application/json'}
@@ -94,18 +93,18 @@ class TestRtpReceiverBackend(unittest.TestCase):
 
     def test_schema_filtering(self):
         """Checks that the correct JSON schema is returned"""
-        for x in range(0,1):
-            for y in range(0,1):
+        for x in range(0, 1):
+            for y in range(0, 1):
                 fec = (x == 0)
                 rtcp = (y == 0)
             self.dut._enableFec = fec
             self.dut._enableRtcp = rtcp
             schema = self.dut.getParamsSchema(0)['items']['properties']
-            for key,value in schema.items():
+            for key, value in schema.items():
                 if not fec:
-                    self.assertNotEqual(key[0:2],"fec")
+                    self.assertNotEqual(key[0:2], "fec")
                 if not rtcp:
-                    self.assertNotEqual(key[0:3],"rtcp")
+                    self.assertNotEqual(key[0:3], "rtcp")
 
     def test_schema_merging(self):
         """Checks that constraints get merged into the schema properly"""
@@ -116,7 +115,7 @@ class TestRtpReceiverBackend(unittest.TestCase):
             "10.0.0.2"
         ]
         self.dut.constraints = [{
-            "interface_ip":{
+            "interface_ip": {
                 "enum": []
             },
             "destination_port":{
@@ -203,23 +202,26 @@ class TestRtpReceiverBackend(unittest.TestCase):
 
     def test_get_constraints(self):
         """Test getting and filtering of constraints"""
-        data = [{
-            "src_port": {
-                "maximum": 90000,
-                "minimum": 500
+        data = [
+            {
+                "src_port": {
+                    "maximum": 90000,
+                    "minimum": 500
+                },
+                "interface_ip": {
+                    "enum": ["auto"]
+                },
+                "fec1D_destination_port":{
+                    "miniumum": 4,
+                    "maximum": 2000
+                },
+                "rtcp_destination_port": {
+                    "maximum": 90000,
+                    "minimum": 500
+                }
             },
-            "interface_ip":{
-                "enum": ["auto"]
-            },
-            "fec1D_destination_port":{
-                "miniumum": 4,
-                "maximum": 2000
-            },
-            "rtcp_destination_port":{
-                "maximum": 90000,
-                "minimum": 500
-            }
-        },{}]
+            {}
+        ]
         data[1] = copy.deepcopy(data[0])
         self.dut.constraints = data
         self.dut._enableFec = False
@@ -266,66 +268,66 @@ class TestRtpReceiverBackend(unittest.TestCase):
     def test_resolve_interface_ip(self):
         self.dut.constraints[0]['interface_ip']['enum'].append("192.168.0.50")
         expected = "192.168.0.50"
-        actual = self.dut.defaultInterfaceSelector({},0)
+        actual = self.dut.defaultInterfaceSelector({}, 0)
         self.assertEqual(expected, actual)
 
     def test_resolve_rtcp_dest_port(self):
         """Test automatic resolution of rtcp dest port"""
         data = [{"destination_port": 5000}]
         expected = 5001
-        actual = self.dut._resolveRtcpDestPort(data,0)
+        actual = self.dut._resolveRtcpDestPort(data, 0)
         self.assertEqual(expected, actual)
 
     def test_resolve_rtcp_dest_ip(self):
         """Test automatic resolution of rtcp dest ip"""
         # unicast
-        data = [{ 'multicast_ip': None, 'interface_ip': "192.168.0.1"}]
+        data = [{'multicast_ip': None, 'interface_ip': "192.168.0.1"}]
         expected = "192.168.0.1"
-        actual = self.dut._resolveRtcpDestIp(data,0)
+        actual = self.dut._resolveRtcpDestIp(data, 0)
         self.assertEqual(actual, expected)
         # multicast
         data[0]['multicast_ip'] = "232.158.113.169"
         expected = "232.158.113.169"
-        actual = self.dut._resolveRtcpDestIp(data,0)
+        actual = self.dut._resolveRtcpDestIp(data, 0)
         self.assertEqual(actual, expected)
 
     def test_resolve_fec1d_dest_port(self):
         """Test automatic resolution of fec1d destination port"""
         data = [{"destination_port": 5000}]
         expected = 5002
-        actual = self.dut._resolveFec1DDestPort(data,0)
+        actual = self.dut._resolveFec1DDestPort(data, 0)
         self.assertEqual(expected, actual)
 
     def test_resolve_fec2d_dest_port(self):
         """Test automatic resolution of fec2d destination port"""
         data = [{"destination_port": 5000}]
         expected = 5004
-        actual = self.dut._resolveFec2DDestPort(data,0)
+        actual = self.dut._resolveFec2DDestPort(data, 0)
         self.assertEqual(expected, actual)
 
     def test_resolve_fecIp(self):
         """Test automatic resolution of fec ip address"""
         # unicast
-        data = [{ 'multicast_ip': None, 'interface_ip': "192.168.0.1"}]
+        data = [{'multicast_ip': None, 'interface_ip': "192.168.0.1"}]
         expected = "192.168.0.1"
-        actual = self.dut._resolveFecIp(data,0)
+        actual = self.dut._resolveFecIp(data, 0)
         self.assertEqual(actual, expected)
         # multicast
         data[0]['multicast_ip'] = "232.158.113.169"
         expected = "232.158.113.169"
-        actual = self.dut._resolveFecIp(data,0)
+        actual = self.dut._resolveFecIp(data, 0)
         self.assertEqual(actual, expected)
 
     def test_resolve_interface_port(self):
         """Test automatic resolution of interface port"""
         expected = 5004
-        actual = self.dut._resolveInterfacePort({},0)
+        actual = self.dut._resolveInterfacePort({}, 0)
         self.assertEqual(expected, actual)
 
     def test_resolve_parameters(self):
         """Test resolve parameters"""
         self.dut.constraints[0]['interface_ip']['enum'].append("192.168.0.50")
-        data = {"transport_params":[{
+        data = {"transport_params": [{
             "source_ip": "192.168.0.1",
             "multicast_ip": "232.158.113.169",
             "interface_ip": "auto",
@@ -351,10 +353,12 @@ class TestRtpReceiverBackend(unittest.TestCase):
         actual = self.dut.resolveParameters(data)
         self.assertEqual(actual, expected)
 
+
 class testFieldException(unittest.TestCase):
 
     def test_raises(self):
-        def x(self): raise FieldException("Test", "Field")
+        def x(self):
+            raise FieldException("Test", "Field")
         self.assertRaises(FieldException, x, [])
 
     def test_json_field(self):
