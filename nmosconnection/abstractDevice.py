@@ -121,7 +121,7 @@ class AbstractDevice:
     def setActiveParameter(self, value, parameter, leg=0):
         """Set the value of an active parameter"""
         if parameter in self.active[__tp__][leg]:
-            self.staged[__tp__][leg][parameter]
+            self.active[__tp__][leg][parameter] = value
         else:
             raise ValueError
 
