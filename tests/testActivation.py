@@ -17,9 +17,10 @@ import unittest
 import time
 import json
 from mediatimestamp import Timestamp, TimeOffset
+from jsonschema import validate, ValidationError
+
 from nmosconnection.activator import Activator
 from nmosconnection.fieldException import FieldException
-from jsonschema import validate, ValidationError
 
 __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))

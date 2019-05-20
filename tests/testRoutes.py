@@ -15,13 +15,14 @@
 import unittest
 import requests
 import os
-from nmoscommon.logger import Logger
 import json
-from nmosconnection.api import ConnectionManagementAPI
-from nmoscommon.httpserver import HttpServer
-from jsonschema import ValidationError, validate
 import uuid
+from jsonschema import ValidationError, validate
+
+from nmoscommon.httpserver import HttpServer
+from nmoscommon.logger import Logger
 from nmosconnection.abstractDevice import StagedLockedException
+from nmosconnection.api import ConnectionManagementAPI
 
 SENDER_WS_PORT = 8857
 
@@ -29,7 +30,7 @@ HEADERS = {'Content-Type': 'application/json'}
 __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
-EXAMPLE_PATH = "../testing/examples/"
+EXAMPLE_PATH = "./examples/"
 RECIEVER_EXAMPLES = [
     "v1.0-receiver-patch-absolute.json",
     "v1.0-receiver-patch.json",
@@ -319,7 +320,7 @@ class TestRoutes(unittest.TestCase):
         r = requests.get(self.senderRoot + "/staged/",
                          headers=HEADERS)
         expected = self.mockApi.staged
-        expected['activation'] = {"request": "active"}
+        expected['activation'] = {"request": "last"}
         actual = json.loads(r.text)
         self.assertEqual(expected, actual)
 

@@ -19,8 +19,8 @@ import copy
 from jsonschema import ValidationError
 from nmoscommon.logger import Logger
 
-from .abstractDevice import StagedLockedException
-from .rtpSender import RtpSender
+from nmosconnection.abstractDevice import StagedLockedException
+from nmosconnection.rtpSender import RtpSender
 
 API_WS_PORT = 8856
 SENDER_WS_PORT = 8857
@@ -65,7 +65,7 @@ class TestRtpSenderBackend(unittest.TestCase):
 
     def _deadlyCallback(self, *args):
         # This callback will always fail
-        raise BaseException
+        raise Exception
 
     def _getExampleObject(self, fec=True, rtcp=True):
         testObj = {}
@@ -255,9 +255,9 @@ class TestRtpSenderBackend(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_resolve_default_source_ip(self):
-        self.dut.constraints['source_ip']['enum'].append("192.168.0.50")
+        self.dut.constraints[0]['source_ip']['enum'].append("192.168.0.50")
         expected = "192.168.0.50"
-        actual = self.dut.defaultSourceSelector({})
+        actual = self.dut.defaultSourceSelector({}, 0)
         self.assertEqual(expected, actual)
 
     def test_resolve_destination_ip(self):

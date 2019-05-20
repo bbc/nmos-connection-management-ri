@@ -17,6 +17,7 @@ import unittest
 import os
 import copy
 from nmoscommon.logger import Logger
+
 from nmosconnection.rtpReceiver import RtpReceiver
 from nmosconnection.fieldException import FieldException
 

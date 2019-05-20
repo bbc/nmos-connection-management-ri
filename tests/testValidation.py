@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import unittest
-from nmosconnection import validation
+from . import validation
 
 
 class TestValidation(unittest.TestCase):

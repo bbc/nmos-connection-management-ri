@@ -14,10 +14,11 @@
 
 import unittest
 import copy
-from nmosconnection.sdpManager import SdpManager
+from flask import Response
+
 from nmoscommon.webapi import WebAPI, basic_route
 from nmoscommon.logger import Logger
-from flask import Response
+from nmosconnection.sdpManager import SdpManager
 
 TESTING_HTTP_PORT = 8080
 
