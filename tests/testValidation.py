@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import unittest
-from . import validation
+import validation
 
 
 class TestValidation(unittest.TestCase):

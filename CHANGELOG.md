@@ -1,5 +1,8 @@
 # NMOS Connection Management API Implementation Changelog
 
+## 2.1.3
+- Fix Linting, change tests file structure, add Python 2/3 linting stages to CI
+
 ## 2.1.2
 - Fix potential race condition in the availability of SDP files
 
