@@ -61,36 +61,36 @@ class ConnectionManagementAPI(WebAPI):
         self.schemaPath = SCHEMA_LOCAL
         self.useValidation = True  # Used for unit testing
 
-    def addSender(self, sender, uuid):
-        if uuid in self.senders:
+    def addSender(self, sender, senderId):
+        if senderId in self.senders:
             raise DuplicateRegistrationException(
-                "Sender already registered with uuid " + uuid
+                "Sender already registered with uuid " + senderId
             )
-        self.senders[uuid] = sender
-        self.activators[uuid] = Activator([sender])
-        return self.activators[uuid]
+        self.senders[senderId] = sender
+        self.activators[senderId] = Activator([sender])
+        return self.activators[senderId]
 
-    def addReceiver(self, receiver, uuid):
-        if uuid in self.receivers:
+    def addReceiver(self, receiver, receiverId):
+        if receiverId in self.receivers:
             raise DuplicateRegistrationException(
-                "Receiver already registered with uuid " + uuid
+                "Receiver already registered with uuid " + receiverId
             )
-        self.receivers[uuid] = receiver
+        self.receivers[receiverId] = receiver
         # Note the transport managers must be listed first so that they activate first
         # This ensures that SDP files are available via the API before any interactions with the driver
         if receiver.legs == 1:
-            self.activators[uuid] = Activator([
+            self.activators[receiverId] = Activator([
                 receiver.transportManagers[0],
                 receiver
             ])
         else:
-            self.activators[uuid] = Activator([
+            self.activators[receiverId] = Activator([
                 receiver.transportManagers[0],
                 receiver.transportManagers[1],
                 receiver
             ])
-        self.transportManagers[uuid] = receiver.transportManagers[0]
-        return self.activators[uuid]
+        self.transportManagers[receiverId] = receiver.transportManagers[0]
+        return self.activators[receiverId]
 
     def getTransceiver(self, api_version, sr, srID):
         if sr == "receivers":
@@ -118,18 +118,17 @@ class ConnectionManagementAPI(WebAPI):
                         self.getattr(sr)[srID].getTransportType(), api_version
                 ))
                 highest_api_version = CONN_APIVERSIONS[-1]
-                headers = {"location": request.url.replace(api_version, highest_api_version)}
-                return (409, headers)
+                abort(409)
             except Exception:
                 abort(404)
 
-    def removeSender(self, uuid):
-        del self.senders[uuid]
-        del self.activators[uuid]
+    def removeSender(self, senderId):
+        del self.senders[senderId]
+        del self.activators[senderId]
 
-    def removeReceiver(self, uuid):
-        del self.receivers[uuid]
-        del self.activators[uuid]
+    def removeReceiver(self, receiverId):
+        del self.receivers[receiverId]
+        del self.activators[receiverId]
 
     def getActivator(self, srID):
         return self.activators[srID]
@@ -176,16 +175,16 @@ class ConnectionManagementAPI(WebAPI):
         self.validateAPIVersion(api_version)
         if sr == "receivers":
             keys = list()
-            for receiver_id in self.receivers.keys():
-                if self.receivers[receiver_id].getTransportType() not in VALID_TRANSPORTS[api_version]:
+            for receiverId in self.receivers.keys():
+                if self.receivers[receiverId].getTransportType() not in VALID_TRANSPORTS[api_version]:
                     continue
-                keys.append(receiver_id)
+                keys.append(receiverId)
         elif sr == "senders":
             keys = list()
-            for sender_id in self.senders.keys():
-                if self.senders[sender_id].getTransportType() not in VALID_TRANSPORTS[api_version]:
+            for senderId in self.senders.keys():
+                if self.senders[senderId].getTransportType() not in VALID_TRANSPORTS[api_version]:
                     continue
-                keys.append(sender_id)
+                keys.append(senderId)
         else:
             return 404
         toReturn = []
@@ -294,18 +293,18 @@ class ConnectionManagementAPI(WebAPI):
             toReturn['transport_file'] = transportManager.getStagedRequest()
         return (activationRet[0], toReturn)
 
-    def applyReceiverId(self, id, srID):
+    def applyReceiverId(self, recieverId, receiver):
         try:
-            srID.setReceiverId(id)
+            receiver.setReceiverId(recieverId)
         except ValidationError as e:
             return self.errorResponse(400, str(e))
         except StagedLockedException:
             return (423, self.errorResponse(423, "Resource is locked due to a pending activation"))
         return (200, {})
 
-    def applySenderId(self, srID, srObject):
+    def applySenderId(self, senderId, sender):
         try:
-            srObject.setSenderId(srID)
+            sender.setSenderId(senderId)
         except ValidationError as e:
             return (400, self.errorResponse(400, str(e)))
         except StagedLockedException:
@@ -336,9 +335,9 @@ class ConnectionManagementAPI(WebAPI):
             return (423, self.errorResponse(423, "{}. Resource is locked due to a pending activation".format(e)))
         return (200, {})
 
-    def applyActivation(self, request, uuid):
+    def applyActivation(self, request, srID):
         try:
-            activator = self.getActivator(uuid)
+            activator = self.getActivator(srID)
             toReturn = activator.parseActivationObject(request)
         except ValidationError as err:
             return (400, self.errorResponse(400, str(err)))
@@ -357,10 +356,10 @@ class ConnectionManagementAPI(WebAPI):
             toReturn['transport_file'] = transportManager.getActiveRequest()
         return toReturn
 
-    @basic_route(CONN_ROOT + "<api_version>/" + SINGLE_ROOT + 'senders/<srID>/transportfile/')
-    def __transportFileRedirect(self, api_version, srID):
-        srObject = self.validateAgainstSchema(api_version, 'senders', srID)
-        resp = Response(srObject.transportFile)
+    @basic_route(CONN_ROOT + "<api_version>/" + SINGLE_ROOT + 'senders/<senderId>/transportfile/')
+    def __transportFileRedirect(self, api_version, senderId):
+        sender = self.validateAgainstSchema(api_version, 'senders', senderId)
+        resp = Response(sender.transportFile)
         resp.headers['content-type'] = 'application/sdp'
         return resp
 
