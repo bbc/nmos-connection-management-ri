@@ -115,10 +115,13 @@ class ConnectionManagementAPI(WebAPI):
                 return sr_object
             except NotSupportedError:
                 self.logger.writeWARNING("Request for transport type {} not available in api version {}".format(
-                        self.getattr(sr)[srID].getTransportType(), api_version
+                    self.getattr(sr)[srID].getTransportType(), api_version
                 ))
                 highest_api_version = CONN_APIVERSIONS[-1]
-                abort(409)
+                location_header = {'Location': request.url.replace(api_version, highest_api_version)}
+                return (
+                    409, self.errorResponse(409, "Invalid API Version for requested Transport Type"), location_header
+                )
             except Exception:
                 abort(404)
 
@@ -186,7 +189,7 @@ class ConnectionManagementAPI(WebAPI):
                     continue
                 keys.append(senderId)
         else:
-            return 404
+            abort(404)
         toReturn = []
         for key in keys:
             toReturn.append(key + "/")

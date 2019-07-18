@@ -33,7 +33,7 @@ from uuid import uuid4
 from .sdpManager import SdpManager
 from .sdpFactory import senderFileFactory
 from .facadeWrapper import SimpleFacadeWrapper
-from .api import DEVICE_ROOT, CONN_APIVERSIONS
+from .api import CONN_ROOT, CONN_APIVERSIONS
 
 # Set this to change the port the API is presented on
 WS_PORT = 8858
@@ -164,7 +164,7 @@ class NmosDriverWebApi(WebAPI):
     def addControl(self):
         # Add a device level control to the connection management API
         for api_version in CONN_APIVERSIONS:
-            url = "http://{}{}{}/".format(getLocalIP(), DEVICE_ROOT, api_version)
+            url = "http://{}{}{}/".format(getLocalIP(), CONN_ROOT, api_version)
             type = "urn:x-nmos:control:sr-ctrl/" + api_version
             self.facade.addControl(self.deviceId, {"type": type, "href": url})
 

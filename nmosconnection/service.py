@@ -28,7 +28,7 @@ monkey.patch_all()
 import signal  # noqa E402
 
 from nmoscommon.httpserver import HttpServer  # noqa E402
-from .api import ConnectionManagementAPI, CONN_APINAME, CONN_APIVERSIONS, DEVICE_ROOT  # noqa E402
+from .api import ConnectionManagementAPI, CONN_APINAME, CONN_APIVERSIONS, CONN_ROOT  # noqa E402
 from .nmosDriver import NmosDriver  # noqa E402
 from .constants import WS_PORT  # noqa E402
 
@@ -68,7 +68,7 @@ class ConnectionManagementService:
                                .format(self.httpServer.port))
 
         self.facade.register_service("http://127.0.0.1:{}".format(self.httpServer.port),
-                                     "{}{}/".format(DEVICE_ROOT[1:], CONN_APIVERSIONS[-1]))
+                                     "{}{}/".format(CONN_ROOT[1:], CONN_APIVERSIONS[-1]))
         try:
             from nmosconnectiondriver.httpIpstudioDriver import httpIpstudioDriver
             self.logger.writeInfo("Using ipstudio driver")
