@@ -352,7 +352,7 @@ class ConnectionManagementAPI(WebAPI):
 
     @route(CONN_ROOT + "<api_version>/" + SINGLE_ROOT + '<transceiverType>/<transceiverId>/active/', methods=['GET'])
     def __activeReceiver(self, api_version, transceiverType, transceiverId):
-        transceiver = self.validateAgainstSchema(api_version, transceiverType, transceiverId)
+        transceiver = self.validateAPIVersion(api_version, transceiverType, transceiverId)
         toReturn = {}
         toReturn = transceiver.activeToJson()
         toReturn['activation'] = self.getActivator(transceiverId).getActiveRequest()
@@ -363,7 +363,7 @@ class ConnectionManagementAPI(WebAPI):
 
     @basic_route(CONN_ROOT + "<api_version>/" + SINGLE_ROOT + 'senders/<senderId>/transportfile/')
     def __transportFileRedirect(self, api_version, senderId):
-        sender = self.validateAgainstSchema(api_version, 'senders', senderId)
+        sender = self.validateAPIVersion(api_version, 'senders', senderId)
         resp = Response(sender.transportFile)
         resp.headers['content-type'] = 'application/sdp'
         return resp
@@ -384,7 +384,7 @@ class ConnectionManagementAPI(WebAPI):
 
     @route(CONN_ROOT + "<api_version>/" + BULK_ROOT)
     def __bulk_root(self, api_version):
-        self.validateAgainstSchema(api_version)
+        self.validateAPIVersion(api_version)
         return ['senders/', 'receivers/']
 
     @route(CONN_ROOT + "<api_version>/" + BULK_ROOT + '<transceiverType>',
