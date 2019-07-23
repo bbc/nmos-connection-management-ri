@@ -92,30 +92,30 @@ class ConnectionManagementAPI(WebAPI):
         self.transportManagers[receiverId] = receiver.transportManagers[0]
         return self.activators[receiverId]
 
-    def getTransceiver(self, api_version, sr, srID):
-        if sr == "receivers":
-            if self.receivers[srID].getTransportType() not in VALID_TRANSPORTS[api_version]:
+    def getTransceiver(self, api_version, transceiverType, transceiverId):
+        if transceiverType == "receivers":
+            if self.receivers[transceiverId].getTransportType() not in VALID_TRANSPORTS[api_version]:
                 raise NotSupportedError
             else:
-                return self.receivers[srID]
-        elif sr == "senders":
-            if self.senders[srID].getTransportType() not in VALID_TRANSPORTS[api_version]:
+                return self.receivers[transceiverId]
+        elif transceiverType == "senders":
+            if self.senders[transceiverId].getTransportType() not in VALID_TRANSPORTS[api_version]:
                 raise NotSupportedError
             else:
-                return self.senders[srID]
+                return self.senders[transceiverId]
         else:
             raise LookupError
 
-    def validateAPIVersion(self, api_version, sr=None, srID=None):
+    def validateAPIVersion(self, api_version, transceiverType=None, transceiverId=None):
         if api_version not in CONN_APIVERSIONS:
             abort(404)
-        if sr is not None and srID is not None:
+        if transceiverType is not None and transceiverId is not None:
             try:
-                sr_object = self.getTransceiver(api_version, sr, srID)
-                return sr_object
+                transceiver = self.getTransceiver(api_version, transceiverType, transceiverId)
+                return transceiver
             except NotSupportedError:
                 self.logger.writeWARNING("Request for transport type {} not available in api version {}".format(
-                    self.getattr(sr)[srID].getTransportType(), api_version
+                    self.getattr(transceiverType)[transceiverId].getTransportType(), api_version
                 ))
                 highest_api_version = CONN_APIVERSIONS[-1]
                 location_header = {'Location': request.url.replace(api_version, highest_api_version)}
@@ -133,11 +133,11 @@ class ConnectionManagementAPI(WebAPI):
         del self.receivers[receiverId]
         del self.activators[receiverId]
 
-    def getActivator(self, srID):
-        return self.activators[srID]
+    def getActivator(self, transceiverId):
+        return self.activators[transceiverId]
 
-    def getTransportManager(self, srID):
-        return self.transportManagers[srID]
+    def getTransportManager(self, transceiverId):
+        return self.transportManagers[transceiverId]
 
     def errorResponse(self, code, message, id=None):
         response = {
@@ -173,16 +173,16 @@ class ConnectionManagementAPI(WebAPI):
         obj = ["senders/", "receivers/"]
         return (200, obj)
 
-    @route(CONN_ROOT + "<api_version>/" + SINGLE_ROOT + '<sr>/')
-    def __connRoot(self, api_version, sr):
+    @route(CONN_ROOT + "<api_version>/" + SINGLE_ROOT + '<transceiverType>/')
+    def __connRoot(self, api_version, transceiverType):
         self.validateAPIVersion(api_version)
-        if sr == "receivers":
+        if transceiverType == "receivers":
             keys = list()
             for receiverId in self.receivers.keys():
                 if self.receivers[receiverId].getTransportType() not in VALID_TRANSPORTS[api_version]:
                     continue
                 keys.append(receiverId)
-        elif sr == "senders":
+        elif transceiverType == "senders":
             keys = list()
             for senderId in self.senders.keys():
                 if self.senders[senderId].getTransportType() not in VALID_TRANSPORTS[api_version]:
@@ -195,79 +195,81 @@ class ConnectionManagementAPI(WebAPI):
             toReturn.append(key + "/")
         return toReturn
 
-    @route(CONN_ROOT + "<api_version>/" + SINGLE_ROOT + '<sr>/<srID>/', methods=['GET'])
-    def __connIndex(self, api_version, srID, sr):
-        self.validateAPIVersion(api_version, sr, srID)
+    @route(CONN_ROOT + "<api_version>/" + SINGLE_ROOT + '<transceiverType>/<transceiverId>/', methods=['GET'])
+    def __connIndex(self, api_version, transceiverId, transceiverType):
+        self.validateAPIVersion(api_version, transceiverType, transceiverId)
         endpoints = ['constraints/', 'staged/', 'active/']
-        if sr == 'senders':
+        if transceiverType == 'senders':
             endpoints.append('transportfile/')
         if api_version != "v1.0":
             endpoints.append('transporttype/')
         return(200, endpoints)
 
-    @route(CONN_ROOT + "<api_version>/" + SINGLE_ROOT + '<sr>/<srID>/constraints/', methods=['GET'])
-    def __constraints(self, api_version, sr, srID):
-        srObject = self.validateAPIVersion(api_version, sr, srID)
-        return srObject.getConstraints()
+    @route(
+        CONN_ROOT + "<api_version>/" + SINGLE_ROOT + '<transceiverType>/<transceiverId>/constraints/', methods=['GET']
+    )
+    def __constraints(self, api_version, transceiverType, transceiverId):
+        transceiver = self.validateAPIVersion(api_version, transceiverType, transceiverId)
+        return transceiver.getConstraints()
 
-    @route(CONN_ROOT + "<api_version>/" + SINGLE_ROOT + '<sr>/<srID>/staged/',
+    @route(CONN_ROOT + "<api_version>/" + SINGLE_ROOT + '<transceiverType>/<transceiverId>/staged/',
            methods=['GET'])
-    def __staged_get(self, api_version, sr, srID):
-        srObject = self.validateAPIVersion(api_version, sr, srID)
-        toReturn = srObject.stagedToJson()
-        toReturn['activation'] = self.getActivator(srID).getLastRequest()
-        if sr == "receivers":
-            transportManager = self.getTransportManager(srID)
+    def __staged_get(self, api_version, transceiverType, transceiverId):
+        transceiver = self.validateAPIVersion(api_version, transceiverType, transceiverId)
+        toReturn = transceiver.stagedToJson()
+        toReturn['activation'] = self.getActivator(transceiverId).getLastRequest()
+        if transceiverType == "receivers":
+            transportManager = self.getTransportManager(transceiverId)
             toReturn['transport_file'] = transportManager.getStagedRequest()
         return toReturn
 
-    @route(CONN_ROOT + "<api_version>/" + SINGLE_ROOT + '<sr>/<srID>/staged',
+    @route(CONN_ROOT + "<api_version>/" + SINGLE_ROOT + '<transceiverType>/<transceiverId>/staged',
            methods=['PATCH'])
     @RequiresAuth()
-    def single_staged_patch(self, api_version, sr, srID):
+    def single_staged_patch(self, api_version, transceiverType, transceiverId):
         req = request.get_json()
-        return self.staged_patch(api_version, sr, srID, req)
+        return self.staged_patch(api_version, transceiverType, transceiverId, req)
 
-    def staged_patch(self, api_version, sr, srID, params):
+    def staged_patch(self, api_version, transceiverType, transceiverId, params):
         toReturn = {}
-        srObject = self.validateAPIVersion(api_version, sr, srID)
+        transceiver = self.validateAPIVersion(api_version, transceiverType, transceiverId)
         try:
-            self.validateAgainstSchema(params, 'v1.0-{}-stage-schema.json'.format(sr[:-1]))
+            self.validateAgainstSchema(params, 'v1.0-{}-stage-schema.json'.format(transceiverType[:-1]))
         except ValidationError as e:
             return (400, self.errorResponse(400, str(e)))
         # If reciever check if transport file must be applied
-        if 'transport_file' in params and sr == "receivers":
-            ret = self.applyTransportFile(params.pop('transport_file'), srID)
+        if 'transport_file' in params and transceiverType == "receivers":
+            ret = self.applyTransportFile(params.pop('transport_file'), transceiverId)
             if ret[0] != 200:
                 return ret
         # If transport params are present apply those next
         if 'transport_params' in params:
-            ret = self.applyTransportParams(params['transport_params'], srObject)
+            ret = self.applyTransportParams(params['transport_params'], transceiver)
             if ret[0] != 200:
                 return ret
         # S/R IDs come next, depending on sender/receiver
-        if 'receiver_id' in params and sr == "senders":
-            ret = self.applyReceiverId(params['receiver_id'], srObject)
+        if 'receiver_id' in params and transceiverType == "senders":
+            ret = self.applyReceiverId(params['receiver_id'], transceiver)
             if ret[0] != 200:
                 return ret
-        if 'sender_id' in params and sr == "receivers":
-            ret = self.applySenderId(params['sender_id'], srObject)
+        if 'sender_id' in params and transceiverType == "receivers":
+            ret = self.applySenderId(params['sender_id'], transceiver)
             if ret[0] != 200:
                 return ret
         # Set master enable
         if 'master_enable' in params:
             try:
-                srObject.setMasterEnable(params['master_enable'])
+                transceiver.setMasterEnable(params['master_enable'])
             except StagedLockedException:
                 return (423, self.errorResponse(423, "Resource is locked due to a pending activation"))
         # Finally carry out activation if requested
         if 'activation' in params:
-            activationRet = self.applyActivation(params['activation'], srID)
+            activationRet = self.applyActivation(params['activation'], transceiverId)
             if activationRet[0] != 200 and activationRet[0] != 202:
                 return activationRet
-            toReturn = self.assembleResponse(sr, srObject, srID, activationRet)
+            toReturn = self.assembleResponse(transceiverType, transceiver, transceiverId, activationRet)
         else:
-            toReturn = (200, self.__staged_get(api_version, sr, srID))
+            toReturn = (200, self.__staged_get(api_version, transceiverType, transceiverId))
         return toReturn
 
     def validateAgainstSchema(self, request, schemaFile):
@@ -284,13 +286,13 @@ class ConnectionManagementAPI(WebAPI):
             checker = FormatChecker(["ipv4", "ipv6"])
             validate(request, schema, format_checker=checker)
 
-    def assembleResponse(self, sr, srObject, srID, activationRet):
-        toReturn = srObject.stagedToJson()
+    def assembleResponse(self, transceiverType, transceiver, transceiverId, activationRet):
+        toReturn = transceiver.stagedToJson()
         toReturn['activation'] = {}
         toReturn['activation'] = activationRet[1]
-        if sr == "receivers":
+        if transceiverType == "receivers":
             try:
-                transportManager = self.getTransportManager(srID)
+                transportManager = self.getTransportManager(transceiverId)
             except Exception:
                 return (500, self.errorResponse(500, "Could not find transport manager"))
             toReturn['transport_file'] = transportManager.getStagedRequest()
@@ -314,9 +316,9 @@ class ConnectionManagementAPI(WebAPI):
             return (423, self.errorResponse(423, "Resource is locked due to a pending activation"))
         return (200, {})
 
-    def applyTransportParams(self, request, srObject):
+    def applyTransportParams(self, request, transceiver):
         try:
-            srObject.patch(request)
+            transceiver.patch(request)
         except ValidationError as err:
             return (400, {"code": 400, "error": str(err),
                           "debug": str(traceback.format_exc())})
@@ -324,8 +326,8 @@ class ConnectionManagementAPI(WebAPI):
             return (423, self.errorResponse(423, "Resource is locked due to a pending activation"))
         return (200, {})
 
-    def applyTransportFile(self, request, srID):
-        transportManager = self.getTransportManager(srID)
+    def applyTransportFile(self, request, transceiverId):
+        transportManager = self.getTransportManager(transceiverId)
         try:
             transportManager.update(request)
         except KeyError as err:
@@ -338,9 +340,9 @@ class ConnectionManagementAPI(WebAPI):
             return (423, self.errorResponse(423, "{}. Resource is locked due to a pending activation".format(e)))
         return (200, {})
 
-    def applyActivation(self, request, srID):
+    def applyActivation(self, request, transceiverId):
         try:
-            activator = self.getActivator(srID)
+            activator = self.getActivator(transceiverId)
             toReturn = activator.parseActivationObject(request)
         except ValidationError as err:
             return (400, self.errorResponse(400, str(err)))
@@ -348,14 +350,14 @@ class ConnectionManagementAPI(WebAPI):
             return (500, self.errorResponse(500, str(err)))
         return toReturn
 
-    @route(CONN_ROOT + "<api_version>/" + SINGLE_ROOT + '<sr>/<srID>/active/', methods=['GET'])
-    def __activeReceiver(self, api_version, sr, srID):
-        srObject = self.validateAgainstSchema(api_version, sr, srID)
+    @route(CONN_ROOT + "<api_version>/" + SINGLE_ROOT + '<transceiverType>/<transceiverId>/active/', methods=['GET'])
+    def __activeReceiver(self, api_version, transceiverType, transceiverId):
+        transceiver = self.validateAgainstSchema(api_version, transceiverType, transceiverId)
         toReturn = {}
-        toReturn = srObject.activeToJson()
-        toReturn['activation'] = self.getActivator(srID).getActiveRequest()
-        if sr == "receivers":
-            transportManager = self.getTransportManager(srID)
+        toReturn = transceiver.activeToJson()
+        toReturn['activation'] = self.getActivator(transceiverId).getActiveRequest()
+        if transceiverType == "receivers":
+            transportManager = self.getTransportManager(transceiverId)
             toReturn['transport_file'] = transportManager.getActiveRequest()
         return toReturn
 
@@ -366,14 +368,16 @@ class ConnectionManagementAPI(WebAPI):
         resp.headers['content-type'] = 'application/sdp'
         return resp
 
-    @route(CONN_ROOT + "<api_version>/" + SINGLE_ROOT + '<sr>/<srID>/transporttype/', methods=['GET'])
-    def __transportType(self, api_version, sr, srID):
+    @route(
+        CONN_ROOT + "<api_version>/" + SINGLE_ROOT + '<transceiverType>/<transceiverId>/transporttype/', methods=['GET']
+    )
+    def __transportType(self, api_version, transceiverType, transceiverId):
         if api_version == "v1.0":
             # This resource doesn't exist before v1.1
             abort(404)
-        srObject = self.validateAPIVersion(api_version, sr, srID)
+        transceiver = self.validateAPIVersion(api_version, transceiverType, transceiverId)
         toReturn = {}
-        toReturn = json.dumps(TRANSPORT_URN + srObject.getTransportType())
+        toReturn = json.dumps(TRANSPORT_URN + transceiver.getTransportType())
         return toReturn
 
     """Begin bulk API routes"""
@@ -383,9 +387,9 @@ class ConnectionManagementAPI(WebAPI):
         self.validateAgainstSchema(api_version)
         return ['senders/', 'receivers/']
 
-    @route(CONN_ROOT + "<api_version>/" + BULK_ROOT + '<sr>',
+    @route(CONN_ROOT + "<api_version>/" + BULK_ROOT + '<transceiverType>',
            methods=['POST'])
-    def __bulk_senders_staged_patch(self, api_version, sr):
+    def __bulk_senders_staged_patch(self, api_version, transceiverType):
         """Process a bulk staging object and sindicate it out to individual
         senders/receivers"""
         self.validateAPIVersion(api_version)
@@ -403,7 +407,7 @@ class ConnectionManagementAPI(WebAPI):
                 except KeyError as e:
                     message = "{}. Failed to find field 'params' in one or more objects".format(e)
                     return (400, self.errorResponse(400, message))
-                res = self.staged_patch(api_version, sr, id, params)
+                res = self.staged_patch(api_version, transceiverType, id, params)
                 statuses.append({"id": id, "code": res[0]})
         except TypeError as err:
             return (400, {"code": 400, "error": str(err),
@@ -412,9 +416,9 @@ class ConnectionManagementAPI(WebAPI):
 
     # The below is not part of the API - it is used to make the active
     # SDP file available over HTTP to BBC R&D RTP Receivers
-    @basic_route(CONN_ROOT + "<api_version>/" + SINGLE_ROOT + 'receivers/<srID>/active/sdp/')
-    def __active_sdp(self, api_version, srID):
-        receiver = self.validateAPIVersion(api_version, 'receivers', srID)
+    @basic_route(CONN_ROOT + "<api_version>/" + SINGLE_ROOT + 'receivers/<transceiverId>/active/sdp/')
+    def __active_sdp(self, api_version, transceiverId):
+        receiver = self.validateAPIVersion(api_version, 'receivers', transceiverId)
         try:
             manager = receiver.transportManagers[0]
         except Exception:
