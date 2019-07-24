@@ -534,6 +534,10 @@ class TestRoutes(unittest.TestCase):
     def test_bulk_post(self):
         """Check that the bulk interface syndicates requests properly"""
         self.callbackReturn = (200, {})
+        self.dut.addSender(self.mockApi, "cdfe565e-5c02-11e7-907b-a6006ad3dba0")
+        self.dut.addSender(self.mockApi, "cdfe5910-5c02-11e7-907b-a6006ad3dba0")
+        self.dut.addSender(self.mockApi, "cdfe5a1e-5c02-11e7-907b-a6006ad3dba0")
+
         data = [
             {
                 "id": "cdfe565e-5c02-11e7-907b-a6006ad3dba0",
