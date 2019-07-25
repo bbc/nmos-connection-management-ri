@@ -1,5 +1,8 @@
 # NMOS Connection Management API Implementation Changelog
 
+## 2.2.1
+- Change variable names, add function for API version and transport type validation, fix tests
+
 ## 2.2.0
 - Add mechanism to access Sender's receiver_id from driver
 
