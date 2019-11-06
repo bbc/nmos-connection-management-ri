@@ -7,7 +7,7 @@ After=network.target network-online-target
 User=ipstudio
 Restart=always
 RestartSec=3
-ExecStart=/usr/bin/connectionmanagement
+ExecStart=/usr/bin/python2 /usr/bin/connectionmanagement
 
 [Install]
 WantedBy=multi-user.target
