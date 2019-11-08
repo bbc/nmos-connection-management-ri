@@ -1,5 +1,8 @@
 # NMOS Connection Management API Implementation Changelog
 
+## 2.2.4
+- Alter executable to run using Python3, alter `stdeb` to replace python 2 package
+
 ## 2.2.3
 - Fix ordering issue causing OPTIONS fails with Python 3
 

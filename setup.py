@@ -57,7 +57,7 @@ packages_required = [
 
 setup(
     name="connectionmanagement",
-    version="2.2.3",
+    version="2.2.4",
     description="Connection Management API implementation",
     url='https://github.com/bbc/nmos-device-connection-management-ri/',
     author='BBC R&D',
