@@ -1,5 +1,8 @@
 # NMOS Connection Management API Implementation Changelog
 
+## 2.2.9
+- Replace RequiresAuth decorator with AuthMiddleware middleware
+
 ## 2.2.8
 - Pin version of mediatimestamp
 

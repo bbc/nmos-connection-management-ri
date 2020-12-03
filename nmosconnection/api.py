@@ -14,13 +14,16 @@
 
 from __future__ import absolute_import
 
+import json
 import os
+import traceback
+
 from flask import request, abort, Response
 from jsonschema import validate, FormatChecker, ValidationError
-import traceback
-import json
-from nmoscommon.auth.nmos_auth import RequiresAuth
 from nmoscommon.webapi import WebAPI, route, basic_route
+from nmoscommon.auth.auth_middleware import AuthMiddleware
+from nmoscommon.nmoscommonconfig import config as _config
+
 
 from .activator import Activator
 from .constants import SCHEMA_LOCAL
@@ -60,6 +63,11 @@ class ConnectionManagementAPI(WebAPI):
         self.transportManagers = {}
         self.schemaPath = SCHEMA_LOCAL
         self.useValidation = True  # Used for unit testing
+
+        # Add Auth Middleware
+        oauth_mode = _config.get('oauth_mode', False)
+        self.app.wsgi_app = AuthMiddleware(self.app.wsgi_app, auth_mode=oauth_mode, api_name=CONN_APINAME)
+
 
     def addSender(self, sender, senderId):
         if senderId in self.senders:
@@ -214,7 +222,6 @@ class ConnectionManagementAPI(WebAPI):
 
     @route(CONN_ROOT + "<api_version>/" + SINGLE_ROOT + '<transceiverType>/<transceiverId>/staged',
            methods=['PATCH'])
-    @RequiresAuth()
     def single_staged_patch(self, api_version, transceiverType, transceiverId):
         req = request.get_json()
         return self.staged_patch(api_version, transceiverType, transceiverId, req)
