@@ -50,7 +50,7 @@ packages_required = [
     "gevent",
     "mediatimestamp<2.0.0",
     "requests",
-    "nmoscommon",
+    "nmoscommon>=0.20.0",
     "six",
     "nodefacade>=0.10.1",
     "werkzeug>=0.14.1,<1.0.0"  # Echo pin from nmos-common to avoid Flask overriding it
